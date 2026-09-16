@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f6fbff" />
+  <meta name="description" content="FD-VAD is an ASR-free streaming semantic endpoint detector for full-duplex speech that maps bounded causal audio directly to CONTINUE/STOP decisions." />
+  <meta property="og:title" content="FD-VAD: Semantic Endpoint Detection for Streaming Full-Duplex Speech" />
+  <meta property="og:description" content="ASR-free semantic endpoint detection from causal audio windows for natural full-duplex turn-taking." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fd-vad.github.io/" />
+  <meta property="og:image" content="https://fd-vad.github.io/assets/semantic_endpointing.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>FD-VAD — Semantic Endpoint Detection for Streaming Full-Duplex Speech</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header" id="top">
+    <nav class="nav wrap" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="FD-VAD home">
+        <span class="brand-mark" aria-hidden="true">FD</span>
+        <span>FD-VAD</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links" id="nav-links">
+        <a href="#abstract">Abstract</a>
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="#bibtex">BibTeX</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero section">
+      <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
+      <div class="wrap hero-inner">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Streaming semantic endpoint detection · Full-duplex speech</div>
+        <h1><span class="accent">FD-VAD</span>: Semantic Endpoint Detection for Streaming Full-Duplex Speech</h1>
+        <p class="hero-lead">Can a voice agent tell the difference between a user who is <em>pausing</em> and a user who is actually <em>done</em> — directly from streaming audio?</p>
+
+        <div class="authors" aria-label="Authors">
+          <span>Puneet Mathur</span>
+          <span class="author-sep">·</span>
+          <a href="https://www.cs.umd.edu/people/dmanocha" target="_blank" rel="noreferrer">Dinesh Manocha</a>
+        </div>
+        <div class="affiliation">University of Maryland, College Park</div>
+
+        <div class="hero-actions" aria-label="Project links">
+          <a class="button button-primary" href="assets/FD_VAD_ICASSP_2027.pdf" target="_blank" rel="noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v6h5M9 13h6M9 17h6"/></svg>
+            Paper
+          </a>
+          <a class="button" href="https://github.com/fd-vad/fd-vad.github.io" target="_blank" rel="noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.87c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0 1 12 6.82a9.6 9.6 0 0 1 2.5.34c1.9-1.29 2.74-1.02 2.74-1.02.56 1.37.21 2.39.1 2.64.65.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.86v2.76c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+            Code
+          </a>
+          <a class="button" href="https://huggingface.co/puneetUMD/fd-vad" target="_blank" rel="noreferrer">
+            <span class="hf" aria-hidden="true">🤗</span>
+            Model
+          </a>
+        </div>
+
+        <div class="stats" aria-label="Headline results">
+          <div class="stat-card">
+            <div class="stat-value">0.853</div>
+            <div class="stat-label">TurnBench EOT recall</div>
+            <div class="stat-note">zero-shot · FP ≤ 0.10</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">0.6%</div>
+            <div class="stat-label">chunk false-stop rate</div>
+            <div class="stat-note">held-out Smart Turn</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">45.8 ms</div>
+            <div class="stat-label">per 2.56 s window</div>
+            <div class="stat-note">single NVIDIA A100</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">10.3M</div>
+            <div class="stat-label">trainable parameters</div>
+            <div class="stat-note">1.7% of total</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-tight" id="overview">
+      <div class="wrap">
+        <figure class="figure-card figure-wide reveal">
+          <img src="assets/semantic_endpointing.png" alt="Illustration contrasting a mid-turn pause with a true endpoint, showing acoustic VAD and semantic VAD decisions." />
+          <figcaption><strong>Semantic endpointing, not just silence detection.</strong> A pause may occur inside a turn. FD-VAD reasons from the speech observed so far to decide whether the user should continue or yield the floor.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="abstract">
+      <div class="wrap narrow">
+        <div class="section-kicker">01 · Abstract</div>
+        <h2>Endpoint detection as causal audio-language reasoning</h2>
+        <p class="abstract-text">Natural turn-taking in full-duplex voice interaction requires determining from partial speech whether a pause reflects hesitation or a completed conversational intent. Acoustic VAD lacks this semantic information, while cascaded ASR-based endpointing introduces transcription dependence and additional processing stages. FD-VAD formulates semantic endpoint detection as a causal audio-language reasoning task and maps bounded causal audio windows directly to <strong>CONTINUE</strong>/<strong>STOP</strong> decisions.</p>
+        <p class="abstract-text">The model combines a frozen speech encoder, a lightweight modality adapter, and a parameter-efficiently adapted language model with a last-chunk training objective for streaming inference. Confidence-gated endpoint commitment controls the interruption–delay trade-off, while boundary-focused hard-negative sampling emphasizes ambiguous regions near true turn boundaries.</p>
+      </div>
+    </section>
+
+    <section class="section tint" id="problem">
+      <div class="wrap">
+        <div class="section-kicker">02 · Why semantic VAD?</div>
+        <h2>Silence is an acoustic event. Turn completion is a semantic decision.</h2>
+        <div class="problem-grid">
+          <article class="problem-card reveal">
+            <div class="problem-icon sound-icon" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Acoustic VAD</h3>
+            <p>Detects whether speech energy is present. It can find a silence boundary, but a silence can be a hesitation, a planning pause, or the end of a turn.</p>
+            <div class="pill-row"><span class="pill neutral">streaming</span><span class="pill warning">no semantic completion</span></div>
+          </article>
+          <article class="problem-card reveal">
+            <div class="problem-icon transcript-icon" aria-hidden="true">Aa</div>
+            <h3>ASR → semantic classifier</h3>
+            <p>Provides lexical semantics, but inserts transcription into the latency-critical turn-taking loop and inherits ASR errors and extra processing stages.</p>
+            <div class="pill-row"><span class="pill positive">semantic</span><span class="pill warning">ASR dependency</span></div>
+          </article>
+          <article class="problem-card emphasis reveal">
+            <div class="problem-icon fd-icon" aria-hidden="true">FD</div>
+            <h3>FD-VAD</h3>
+            <p>Consumes causal audio directly and predicts whether the user still holds the conversational floor. No transcript generation is required.</p>
+            <div class="pill-row"><span class="pill positive">streaming</span><span class="pill positive">semantic</span><span class="pill positive">ASR-free</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="method">
+      <div class="wrap">
+        <div class="section-kicker">03 · Method</div>
+        <h2>A compact audio-to-LLM semantic endpointer</h2>
+        <p class="section-intro">Every 320 ms, FD-VAD evaluates at most 2.56 s of causal audio, converts WavLM features into a compact sequence of LLM audio tokens, and predicts a single semantic state.</p>
+
+        <div class="method-layout">
+          <figure class="figure-card architecture reveal">
+            <img src="assets/fd_vad_architecture.png" alt="FD-VAD architecture with incoming speech, frozen WavLM encoder, modality adapter, Qwen2.5-0.5B with LoRA, and CONTINUE or STOP output." />
+            <figcaption>FD-VAD architecture. The speech encoder and base LLM remain frozen; the modality adapter and LoRA parameters are trained.</figcaption>
+          </figure>
+
+          <div class="method-steps">
+            <article class="method-step reveal">
+              <div class="step-index">1</div>
+              <div><h3>Frozen WavLM encoder</h3><p><strong>WavLM-base-plus</strong> maps raw waveform to frame-level speech features at 50 Hz.</p></div>
+            </article>
+            <article class="method-step reveal">
+              <div class="step-index">2</div>
+              <div><h3>Modality adapter</h3><p>Two linear layers with ReLU jointly <strong>downsample by k = 4</strong> and project speech features into the LLM embedding space.</p></div>
+            </article>
+            <article class="method-step reveal">
+              <div class="step-index">3</div>
+              <div><h3>LoRA-adapted Qwen2.5-0.5B</h3><p>Adapted audio embeddings are combined with a short instruction prompt. The LLM predicts <strong>CONTINUE</strong> or <strong>STOP</strong>.</p></div>
+            </article>
+            <article class="method-step reveal">
+              <div class="step-index">4</div>
+              <div><h3>Last-chunk supervision</h3><p>Training applies the loss only to the state of the terminal chunk, matching the streaming decision made at the newest observation.</p></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="spec-grid">
+          <div class="spec"><span class="spec-value">2.56 s</span><span class="spec-label">maximum causal window</span></div>
+          <div class="spec"><span class="spec-value">320 ms</span><span class="spec-label">inference stride</span></div>
+          <div class="spec"><span class="spec-value">50 Hz</span><span class="spec-label">WavLM features</span></div>
+          <div class="spec"><span class="spec-value">12.5 Hz</span><span class="spec-label">LLM audio tokens</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tint">
+      <div class="wrap">
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="feature-tag">Confidence gating</div>
+            <h3>Control interruption vs. delay</h3>
+            <p>A single erroneous STOP can interrupt the user. FD-VAD can commit STOP only when <span class="math">P(STOP) ≥ τ</span> for <span class="math">K</span> consecutive decisions, exposing an explicit operating-point control.</p>
+            <div class="mini-diagram gate-diagram" aria-label="Confidence gating illustration">
+              <span>0.31</span><span>0.52</span><span class="hot">0.93</span><span class="arrow">→</span><strong>STOP</strong>
+            </div>
+          </article>
+          <article class="feature-card reveal">
+            <div class="feature-tag">Boundary-focused sampling</div>
+            <h3>Train harder near ambiguous boundaries</h3>
+            <p>Hard negatives are concentrated near the true endpoint. Training oversamples windows ending within <span class="math">±2 chunks</span> of the boundary while leaving inference unchanged.</p>
+            <div class="boundary-strip" aria-label="Boundary focused sampling illustration">
+              <span></span><span></span><span class="near"></span><span class="near"></span><i></i><span class="near"></span><span class="near"></span><span></span><span></span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="results">
+      <div class="wrap">
+        <div class="section-kicker">04 · Results</div>
+        <h2>Strong semantic endpointing in-domain and zero-shot in dialogue</h2>
+        <p class="section-intro">FD-VAD combines high endpoint recall with a low premature-stop rate, while remaining causal and streaming.</p>
+
+        <div class="result-highlight-grid">
+          <article class="result-highlight reveal">
+            <div class="result-number">0.832</div>
+            <h3>Chunk F1</h3>
+            <p>on the held-out smart-turn-v3.1 test set, with only <strong>0.6% false-stop</strong> on incomplete-speech chunks.</p>
+          </article>
+          <article class="result-highlight reveal">
+            <div class="result-number">0.966</div>
+            <h3>Utterance accuracy</h3>
+            <p>balanced across complete and incomplete turns and comparable to the strongest offline semantic classifier.</p>
+          </article>
+          <article class="result-highlight reveal">
+            <div class="result-number">0.853</div>
+            <h3>TurnBench EOT recall</h3>
+            <p>zero-shot at <strong>FP = 0.097</strong>, the highest recall among systems satisfying the benchmark FP ≤ 0.10 constraint.</p>
+          </article>
+        </div>
+
+        <div class="table-section reveal">
+          <div class="table-heading">
+            <div><h3>TurnBench dev: zero-shot EOT transfer</h3><p>Recall under the benchmark false-positive constraint. † exceeds FP ≤ 0.10.</p></div>
+            <span class="table-badge">continuous dialogue</span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>System</th><th>Category</th><th>Recall ↑</th><th>FP ↓</th><th>Median latency (ms) ↓</th></tr></thead>
+              <tbody>
+                <tr><td>VAP</td><td>Turn-taking</td><td>0.841</td><td>0.045</td><td>463</td></tr>
+                <tr><td>ESPnet turn-taking</td><td>Turn-taking</td><td>0.836</td><td>0.074</td><td>895</td></tr>
+                <tr><td>Kyutai semantic VAD</td><td>Semantic</td><td>0.803</td><td>0.100</td><td>1024</td></tr>
+                <tr><td>WavLM-large anchor</td><td>Acoustic</td><td>0.825</td><td>0.100</td><td>1017</td></tr>
+                <tr class="ours"><td><strong>FD-VAD</strong></td><td><strong>Ours</strong></td><td><strong>0.853</strong></td><td><strong>0.097</strong></td><td><strong>1019</strong></td></tr>
+                <tr class="muted-row"><td>OpenAI server VAD</td><td>Semantic</td><td>0.933</td><td>0.563†</td><td>281</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">Selected systems are shown here for readability; see the paper for the complete benchmark table.</p>
+        </div>
+
+        <div class="table-section reveal">
+          <div class="table-heading">
+            <div><h3>Utterance-level semantic endpoint classification</h3><p>Held-out smart-turn-v3.1. Streaming systems are marked ✓.</p></div>
+            <span class="table-badge">isolated utterances</span>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Model</th><th>Streaming</th><th>Complete</th><th>Incomplete</th><th>Overall</th></tr></thead>
+              <tbody>
+                <tr><td>Energy VAD</td><td>✓</td><td>0.998</td><td>0.680</td><td>0.839</td></tr>
+                <tr><td>VAP</td><td>✓</td><td>0.728</td><td>0.489</td><td>0.608</td></tr>
+                <tr><td>X2-Turn</td><td>✓</td><td>0.652</td><td>0.812</td><td>0.733</td></tr>
+                <tr><td>Whisper + LLM</td><td>×</td><td>0.860</td><td>0.768</td><td>0.814</td></tr>
+                <tr><td>UltraVAD</td><td>×</td><td>0.920</td><td>0.840</td><td>0.880</td></tr>
+                <tr><td>Smart Turn</td><td>×</td><td>0.966</td><td>0.966</td><td>0.965</td></tr>
+                <tr class="ours"><td><strong>FD-VAD</strong></td><td><strong>✓</strong></td><td><strong>0.968</strong></td><td><strong>0.962</strong></td><td><strong>0.966</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">Selected baselines are shown here for readability; the paper reports the full comparison with 95% bootstrap confidence intervals.</p>
+        </div>
+
+        <div class="findings-grid">
+          <article class="finding reveal"><span>1</span><h3>Semantic cues matter</h3><p>Acoustic termination alone performs poorly on incomplete speech, while FD-VAD maintains balanced endpoint accuracy across complete and incomplete turns.</p></article>
+          <article class="finding reveal"><span>2</span><h3>Streaming need not mean weak semantics</h3><p>FD-VAD reaches 0.966 utterance-level accuracy while making incremental causal decisions rather than waiting for a completed utterance.</p></article>
+          <article class="finding reveal"><span>3</span><h3>Reliability and speed remain a trade-off</h3><p>On TurnBench, FD-VAD reaches high zero-shot recall under the FP budget, but its 1019 ms median commit latency is higher than VAP's 463 ms.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark-section" id="latency">
+      <div class="wrap">
+        <div class="section-kicker light">05 · Streaming latency</div>
+        <h2>Reason while the user is still speaking</h2>
+        <p class="section-intro light-copy">Offline cascades wait for the complete utterance before ASR and semantic inference. FD-VAD updates its endpoint state continuously, so post-speech latency is governed by the streaming decision schedule rather than utterance duration.</p>
+        <div class="latency-grid">
+          <div class="latency-card">
+            <span class="latency-label">Per-window processing</span>
+            <strong>45.8 ms</strong>
+            <small>46.8 ms p90 · 2.56 s causal window · single A100</small>
+          </div>
+          <div class="latency-card">
+            <span class="latency-label">Operating point</span>
+            <strong>190 ms</strong>
+            <small>median endpoint delay · τ = 0.9 · K = 1</small>
+          </div>
+          <div class="latency-card">
+            <span class="latency-label">False interruption</span>
+            <strong>2.0%</strong>
+            <small>at the same confidence-gated operating point</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="quickstart">
+      <div class="wrap">
+        <div class="section-kicker">06 · Quickstart</div>
+        <h2>Run FD-VAD on an audio file</h2>
+        <p class="section-intro">The code repository provides a simple inference entry point. Model weights are hosted separately on Hugging Face.</p>
+        <div class="code-card reveal">
+          <div class="code-toolbar"><span>shell</span><button class="copy-code" data-copy-target="quickstart-code" type="button">Copy</button></div>
+          <pre id="quickstart-code"><code># clone the code
+git clone https://github.com/fd-vad/fd-vad.github.io.git
+cd fd-vad.github.io
+
+# install
+pip install -r requirements.txt
+
+# download the trained adapter / LoRA checkpoint
+huggingface-cli download puneetUMD/fd-vad fd_vad.pt --local-dir .
+
+# run end-of-turn inference
+python infer.py path/to/audio.wav
+
+# inspect per-320 ms P(STOP)
+python infer.py path/to/audio.wav --show-stream</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section tint" id="bibtex">
+      <div class="wrap narrow">
+        <div class="section-kicker">07 · Citation</div>
+        <h2>BibTeX</h2>
+        <div class="code-card bib-card reveal">
+          <div class="code-toolbar"><span>bibtex</span><button class="copy-code" data-copy-target="bibtex-code" type="button">Copy</button></div>
+          <pre id="bibtex-code"><code>@inproceedings{fdvad,
+  title     = {FD-VAD: Semantic Endpoint Detection for Streaming Full-Duplex Speech},
+  author    = {Mathur, Puneet and Manocha, Dinesh},
+  booktitle = {Submitted},
+  year      = {2026}
+}</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <strong>FD-VAD</strong>
+        <span>Semantic Endpoint Detection for Streaming Full-Duplex Speech</span>
+      </div>
+      <div class="footer-links">
+        <a href="assets/FD_VAD_ICASSP_2027.pdf" target="_blank" rel="noreferrer">Paper</a>
+        <a href="https://github.com/fd-vad/fd-vad.github.io" target="_blank" rel="noreferrer">Code</a>
+        <a href="https://huggingface.co/puneetUMD/fd-vad" target="_blank" rel="noreferrer">Model</a>
+      </div>
+      <div class="footer-meta">University of Maryland, College Park · 2026 · Vanilla HTML, CSS & JS</div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
